@@ -1,18 +1,20 @@
-
-const fetch = require('node-fetch'); // You'll need to install this
-console.log('Netlify');
+// Use dynamic import for ESM compatibility
+const fetchModulePromise = import('node-fetch');
+console.log(123);
 exports.handler = async (event, context) => {
-  const psxApiUrl = 'https://www.psx.com.pk/psx/test_api/api_tracker.php'; // The PSX API URL
+  const psxApiUrl = 'https://www.psx.com.pk/psx/test_api/api_tracker.php';
 
   try {
+    // Wait for node-fetch to load
+    const { default: fetch } = await fetchModulePromise;
+
     const response = await fetch(psxApiUrl, {
-      method: 'POST', // Use the correct method (GET or POST) as required by the PSX API
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded', // Adjust if the API expects a different content type
-        // Add any other necessary headers here (e.g., API keys)
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({ // If it's a POST request with form data
-        tracker: event.queryStringParameters.tracker || 'inc_ticker_100', // Get tracker from query, default to 'inc_ticker_100'
+      body: new URLSearchParams({
+        tracker: event.queryStringParameters.tracker || 'inc_ticker_100',
       }).toString(),
     });
 
@@ -23,13 +25,13 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const data = await response.text(); // Or response.json() if the API returns JSON
+    const data = await response.text();
 
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'text/plain', // Or 'application/json' if the PSX API returns JSON
-        'Access-Control-Allow-Origin': '*', // Allow requests from any origin (for development - be more specific in production)
+        'Content-Type': 'text/plain',
+        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
